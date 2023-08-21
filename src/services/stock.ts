@@ -9,21 +9,20 @@ class StockService {
     private transactionsData: Transaction[];
 
     constructor() {
-        this.stockData = readJSONFile<Stock[]>(path.resolve(__dirname, "../../data/stock.json"));
-        this.transactionsData = readJSONFile<Transaction[]>(path.resolve(__dirname, "../../data/transactions.json"));
+        this.stockData = readJSONFile<Stock[]>(path.join(__dirname, '..', '..', 'data', 'stock.json'));
+        this.transactionsData = readJSONFile<Transaction[]>(path.join(__dirname, '..', '..', 'data', 'transactions.json'));
     }
 
-    getCurrentStock(sku: string): { sku: string, qty: number } {
-        const stock = this.stockData.find(entry => entry.sku === sku);
-        const transactions = this.transactionsData.filter(entry => entry.sku === sku);
+    private getStockInfo = (sku: string): Stock | undefined => {
+        return this.stockData.find(entry => entry.sku === sku) ;
+    }
 
-        if(!stock && transactions.length === 0){
-            throw new Error(`SKU doesn't exisit`);
-            
-        }
-        const startingStock = stock ? stock.stock : 0;
+    private getStockTransactions = (sku: string): Transaction[] => {
+        return this.transactionsData.filter(entry => entry.sku === sku);
+    }
 
-        let currentStock = startingStock;
+    private getStockQuantity = (initialStock: number, transactions: Transaction[]): number  => {
+        let currentStock = initialStock;
         for (const transaction of transactions) {
             if (transaction.type === 'order') {
                 currentStock -= transaction.qty;
@@ -32,7 +31,21 @@ class StockService {
             }
         }
 
-        return { sku, qty: currentStock };
+        return currentStock;
+    }
+
+    public getCurrentStock(sku: string): { sku: string, qty: number } {
+        const stock = this.getStockInfo(sku);
+        const transactions = this.getStockTransactions(sku);
+
+        if(!stock && transactions.length === 0){
+            throw new Error(`SKU doesn't exisit`);
+        }
+
+        const startingStock = stock ? stock.stock : 0;
+        const qty = this.getStockQuantity(startingStock,transactions);
+
+        return { sku, qty };
     }
 }
 
