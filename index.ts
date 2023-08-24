@@ -8,7 +8,7 @@ async function getStockInfo(sku: string) {
         const stockInfo = stockService.getCurrentStock(sku);
         return stockInfo;
     } catch (error) {
-        throw new Error(`Error fetching stock information for SKU '${sku}': ${error}`);
+        throw new Error(error);
     }
 }
 
