@@ -16,7 +16,6 @@ describe('StockService', () => {
   const mockTransactionsData: Transaction[] = [
     { sku: 'SKU001', type: 'order', qty: 10 },
     { sku: 'SKU001', type: 'refund', qty: 5 },
-    { sku: 'SKU002', type: 'order', qty: 20 },
     { sku: 'SKU003', type: 'refund', qty: 45 },
     { sku: 'SKU004', type: 'order', qty: 32 },
   ];
@@ -37,6 +36,12 @@ describe('StockService', () => {
     const stockService = new StockService();
     const result = stockService.getCurrentStock('SKU003');
     expect(result).toEqual({ sku: 'SKU003', qty: 45 });
+  });
+
+  it('should calculate current stock correctly without transactions', () => {
+    const stockService = new StockService();
+    const result = stockService.getCurrentStock('SKU002');
+    expect(result).toEqual({ sku: 'SKU002', qty: 50 });
   });
 
   it('should calculate current stock correctly with only order', () => {
